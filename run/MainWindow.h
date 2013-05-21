@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "AutoComplete.h"
 #include "IconView.h"
 
 #include <InterfaceKit.h>
@@ -17,7 +18,7 @@ private:
 			BButton*		fRunButton;
 			BButton*		fBrowseButton;			
 			IconView*		fIconView;
-			BTextView*		fTargetText;
+			AutoComplete*	fTargetText;
 			BFilePanel*		fTargetPanel;
 			BCheckBox*		fUseTerminal;
 			
