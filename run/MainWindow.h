@@ -17,7 +17,7 @@ private:
 			BButton*		fRunButton;
 			BButton*		fBrowseButton;			
 			IconView*		fIconView;
-			BTextControl*	fTargetText;
+			BTextView*		fTargetText;
 			BFilePanel*		fTargetPanel;
 			BCheckBox*		fUseTerminal;
 			

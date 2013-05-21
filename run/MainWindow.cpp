@@ -22,6 +22,7 @@
 
 const uint32 MSG_RUN			= 'mRUN';
 const uint32 MSG_BROWSE			= 'mBRO';
+const uint32 MSG_TEXTCHANGED	= 'mTXC';
 
 const char *kTrackerSignature	= "application/x-vnd.Be-TRAK";
 const char *kTerminalSignature	= "application/x-vnd.Haiku-Terminal";
@@ -43,7 +44,8 @@ MainWindow::MainWindow(void)
 	fRunButton = new BButton(B_TRANSLATE("Run"), new BMessage(MSG_RUN));
 	fBrowseButton = new BButton(B_TRANSLATE("Browse" B_UTF8_ELLIPSIS), new BMessage(MSG_BROWSE));
 	
-	fTargetText = new BTextControl(B_TRANSLATE("Command to run:"), NULL, NULL);
+	//fTargetText = new BTextControl(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_TEXTCHANGED));
+	fTargetText = new BTextView("Command");
 	
 	app_info info;
 	if (be_app->GetAppInfo(&info) == B_OK) {
@@ -86,6 +88,13 @@ MainWindow::MessageReceived(BMessage *msg)
 {
 	switch (msg->what)
 	{
+		case MSG_TEXTCHANGED:
+		{
+			BAlert* alert = new BAlert("Text Changed To", fTargetText->Text(), "Gotcha");
+			alert->Go();
+			break;
+		}
+		
 		case MSG_BROWSE:
 		{
 			BEntry entry(fTargetText->Text(), true);
@@ -122,6 +131,7 @@ MainWindow::MessageReceived(BMessage *msg)
 			BPath path;
 			if (entry.GetPath(&path) == B_OK)
 				fTargetText->SetText(path.Path());
+			break;
 		}
 		
 		default:
