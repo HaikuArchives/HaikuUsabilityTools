@@ -7,7 +7,7 @@ IconView::IconView(BRect rect, BBitmap* icon)
 }
 
 void IconView::AttachedToWindow() {
-	SetFont(be_bold_font);
+	SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 }
 
 void IconView::Draw(BRect updateRect) {
@@ -19,4 +19,5 @@ void IconView::Draw(BRect updateRect) {
 
 void IconView::SetIcon(BBitmap* icon) {
 	fIconBitmap = icon;
+	Invalidate();
 }
