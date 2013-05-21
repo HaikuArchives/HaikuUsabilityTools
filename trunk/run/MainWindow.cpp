@@ -45,7 +45,10 @@ MainWindow::MainWindow(void)
 	fBrowseButton = new BButton(B_TRANSLATE("Browse" B_UTF8_ELLIPSIS), new BMessage(MSG_BROWSE));
 	
 	//fTargetText = new BTextControl(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_TEXTCHANGED));
-	fTargetText = new BTextView("Command");
+	fTargetText = new AutoComplete("Command");
+	fTargetText->DisallowChar('\n');
+	fTargetText->DisallowChar('\t');
+	fTargetText->StartWatchingAll(this);
 	
 	app_info info;
 	if (be_app->GetAppInfo(&info) == B_OK) {
@@ -136,6 +139,7 @@ MainWindow::MessageReceived(BMessage *msg)
 		
 		default:
 		{
+			msg->PrintToStream();
 			BWindow::MessageReceived(msg);
 			break;
 		}
