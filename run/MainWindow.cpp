@@ -44,11 +44,12 @@ MainWindow::MainWindow(void)
 	fRunButton = new BButton(B_TRANSLATE("Run"), new BMessage(MSG_RUN));
 	fBrowseButton = new BButton(B_TRANSLATE("Browse" B_UTF8_ELLIPSIS), new BMessage(MSG_BROWSE));
 	
-	//fTargetText = new BTextControl(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_TEXTCHANGED));
-	fTargetText = new AutoComplete("Command");
-	fTargetText->DisallowChar('\n');
-	fTargetText->DisallowChar('\t');
-	fTargetText->StartWatchingAll(this);
+	fTargetText = new AutoComplete(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_TEXTCHANGED));
+	//fTargetText = new AutoComplete("Command");
+	//fTargetText->DisallowChar('\n');
+	//fTargetText->DisallowChar('\t');
+	//fTargetText->StartWatchingAll(this);
+	fTargetText->SetModificationMessage(new BMessage(MSG_TEXTCHANGED));
 	
 	app_info info;
 	if (be_app->GetAppInfo(&info) == B_OK) {
@@ -93,8 +94,9 @@ MainWindow::MessageReceived(BMessage *msg)
 	{
 		case MSG_TEXTCHANGED:
 		{
-			BAlert* alert = new BAlert("Text Changed To", fTargetText->Text(), "Gotcha");
-			alert->Go();
+			//BAlert* alert = new BAlert("Text Changed To", fTargetText->Text(), "Gotcha");
+			//alert->Go();
+			fTargetText->Suggest("Bloop");
 			break;
 		}
 		
