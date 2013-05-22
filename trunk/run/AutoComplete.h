@@ -3,11 +3,12 @@
 
 #include <InterfaceKit.h>
 
-class AutoComplete : public BTextView { 
+class AutoComplete : public BTextControl { 
 public:
-							AutoComplete(const char* name);
+							AutoComplete(const char* label, const char* text=NULL, BMessage* message=NULL);
 			virtual			~AutoComplete();
-			virtual void 	InsertText(const char* text, int32 length, int32 offset, const text_run_array* runs = NULL);
+			void			Suggest(const char* text);
+			//virtual void 	InsertText(const char* text, int32 length, int32 offset, const text_run_array* runs = NULL);
 };
 
 #endif

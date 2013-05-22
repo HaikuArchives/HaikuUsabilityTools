@@ -1,16 +1,17 @@
 #include "AutoComplete.h"
 
-AutoComplete::AutoComplete(const char* name)
-	:	BTextView(name) 
+AutoComplete::AutoComplete(const char* label, const char* text=NULL, BMessage* message=NULL)
+	:	BTextControl(NULL, label, text, NULL) 
 {
+	SetModificationMessage(message);
 }
 
 AutoComplete::~AutoComplete() {
+//	SetModificationMessage(NULL);
 }
 
 void
-AutoComplete::InsertText(const char* text, int32 length, int32 offset, const text_run_array* runs = NULL) {
-	BTextView::InsertText(text, length, offset, runs);
-	BAlert* alert = new BAlert("Text Changed To", Text(), "Gotcha");
-	alert->Go(); 
+AutoComplete::Suggest(const char* text) {
+	// We'll have to do this `a la google, with a menu/combobox
+	//SetText(text);
 }
