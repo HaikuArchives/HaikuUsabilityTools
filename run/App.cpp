@@ -1,6 +1,7 @@
 #include "App.h"
 #include "MainWindow.h"
 
+#define APP_SIGNATURE "application/x-vnd.usability-Run"
 
 App::App(void)
 	:	BApplication(APP_SIGNATURE)

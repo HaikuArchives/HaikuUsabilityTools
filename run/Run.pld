@@ -12,6 +12,7 @@ SOURCEFILE=MainWindow.cpp
 DEPENDENCY=MainWindow.cpp|MainWindow.h
 SOURCEFILE=AutoComplete.cpp
 DEPENDENCY=/boot/home/haiku-usability-tools/run/AutoComplete.h
+SOURCEFILE=Run.rdef
 SYSTEMINCLUDE=/boot/develop/headers/be
 SYSTEMINCLUDE=/boot/develop/headers/cpp
 SYSTEMINCLUDE=/boot/develop/headers/posix
