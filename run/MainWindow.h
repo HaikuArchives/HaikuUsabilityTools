@@ -22,8 +22,11 @@ private:
 			BFilePanel*		fTargetPanel;
 			BCheckBox*		fUseTerminal;
 			
+			const char*		openWith;
+			
 			status_t		_OpenFile(const char* openWith, BEntry &entry, int32 line = -1, int32 col = -1);
 			int				_Launch();
+			void			_ParseTarget();
 };
 
 #endif
