@@ -22,7 +22,7 @@
 
 const uint32 MSG_RUN			= 'mRUN';
 const uint32 MSG_BROWSE			= 'mBRO';
-const uint32 MSG_TEXTCHANGED	= 'mTXC';
+const uint32 MSG_CHANGED	= 'mTXC';
 
 const char *kTrackerSignature	= "application/x-vnd.Be-TRAK";
 const char *kTerminalSignature	= "application/x-vnd.Haiku-Terminal";
@@ -44,21 +44,14 @@ MainWindow::MainWindow(void)
 	fRunButton = new BButton(B_TRANSLATE("Run"), new BMessage(MSG_RUN));
 	fBrowseButton = new BButton(B_TRANSLATE("Browse" B_UTF8_ELLIPSIS), new BMessage(MSG_BROWSE));
 	
-	fTargetText = new AutoComplete(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_TEXTCHANGED));
+	fTargetText = new AutoComplete(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_CHANGED));
 	//fTargetText = new AutoComplete("Command");
 	//fTargetText->DisallowChar('\n');
 	//fTargetText->DisallowChar('\t');
 	//fTargetText->StartWatchingAll(this);
-	fTargetText->SetModificationMessage(new BMessage(MSG_TEXTCHANGED));
-	
-	app_info info;
-	if (be_app->GetAppInfo(&info) == B_OK) {
-		BBitmap *fIconBitmap = new BBitmap(BRect(0, 0, 31, 31), B_RGBA32);
-		BAppFileInfo appFileInfo(new BFile(&(info.ref), B_READ_ONLY));
-		if (appFileInfo.GetTrackerIcon(fIconBitmap) == B_OK) {
-			fIconView = new IconView(BRect(0, 0, 31, 31), fIconBitmap);
-		}
-	}
+	fTargetText->SetModificationMessage(new BMessage(MSG_CHANGED));
+		
+	fIconView = new IconView();
 	
 	BView* topView = layout->View();
 	const float spacing = be_control_look->DefaultItemSpacing();
@@ -69,7 +62,7 @@ MainWindow::MainWindow(void)
 				.Add(fTargetText, 1, 0, 6, 1)
 			)
 			.AddGroup(B_HORIZONTAL, 5.0)
-				.Add(fUseTerminal = new BCheckBox(NULL, B_TRANSLATE("Open in a terminal"), NULL))
+				.Add(fUseTerminal = new BCheckBox(NULL, B_TRANSLATE("Open in a terminal"), new BMessage(MSG_CHANGED)))
 				.Add(fRunButton)
 				.Add(fBrowseButton)
 			.End()
@@ -92,11 +85,9 @@ MainWindow::MessageReceived(BMessage *msg)
 {
 	switch (msg->what)
 	{
-		case MSG_TEXTCHANGED:
+		case MSG_CHANGED:
 		{
-			//BAlert* alert = new BAlert("Text Changed To", fTargetText->Text(), "Gotcha");
-			//alert->Go();
-			//fTargetText->Suggest("Bloop");
+			_ParseTarget();
 			break;
 		}
 		
@@ -275,4 +266,14 @@ MainWindow::_Launch()
 	}
 	
 	return exitcode;
+}
+
+void
+MainWindow::_ParseTarget()
+{
+	if (fUseTerminal->Value() == B_CONTROL_ON) {
+		fIconView->SetIcon(kTerminalSignature);
+	} else {
+		fIconView->SetDefault();
+	}
 }
