@@ -96,7 +96,7 @@ MainWindow::MessageReceived(BMessage *msg)
 		{
 			//BAlert* alert = new BAlert("Text Changed To", fTargetText->Text(), "Gotcha");
 			//alert->Go();
-			fTargetText->Suggest("Bloop");
+			//fTargetText->Suggest("Bloop");
 			break;
 		}
 		

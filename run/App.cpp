@@ -3,7 +3,7 @@
 
 
 App::App(void)
-	:	BApplication("application/x-vnd.dw-TestApp")
+	:	BApplication(APP_SIGNATURE)
 {
 	MainWindow *mainwin = new MainWindow();
 	mainwin->Show();
