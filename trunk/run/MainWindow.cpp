@@ -22,13 +22,20 @@
 
 const uint32 MSG_RUN			= 'mRUN';
 const uint32 MSG_BROWSE			= 'mBRO';
-const uint32 MSG_CHANGED	= 'mTXC';
+const uint32 MSG_CHANGED		= 'mTXC';
 
 const char *kTrackerSignature	= "application/x-vnd.Be-TRAK";
 const char *kTerminalSignature	= "application/x-vnd.Haiku-Terminal";
 
+//#define DEBUG(message) printf(message);
+//#define DEBUG(message) //
+
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "Run Window"
+
+void DEBUG(const char *message) {
+	printf("%s\n", message);
+}
 
 MainWindow::MainWindow(void)
 	:	BWindow(BRect(100,100,500,200),B_TRANSLATE("Run"),B_TITLED_WINDOW_LOOK, 
@@ -45,10 +52,6 @@ MainWindow::MainWindow(void)
 	fBrowseButton = new BButton(B_TRANSLATE("Browse" B_UTF8_ELLIPSIS), new BMessage(MSG_BROWSE));
 	
 	fTargetText = new AutoComplete(B_TRANSLATE("Command to run:"), NULL, new BMessage(MSG_CHANGED));
-	//fTargetText = new AutoComplete("Command");
-	//fTargetText->DisallowChar('\n');
-	//fTargetText->DisallowChar('\t');
-	//fTargetText->StartWatchingAll(this);
 	fTargetText->SetModificationMessage(new BMessage(MSG_CHANGED));
 		
 	fIconView = new IconView();
@@ -132,7 +135,7 @@ MainWindow::MessageReceived(BMessage *msg)
 		
 		default:
 		{
-			msg->PrintToStream();
+			//msg->PrintToStream();
 			BWindow::MessageReceived(msg);
 			break;
 		}
@@ -268,12 +271,74 @@ MainWindow::_Launch()
 	return exitcode;
 }
 
+char*
+_whereis(const char* target) {
+	DEBUG("Scanning path for");
+	DEBUG(target);
+	// scan through the path
+	char *path = strdup(getenv("PATH"));
+	DEBUG("The path is");
+	DEBUG(path);
+	path = strtok(path, ":");
+
+	while (path != NULL) {
+		BString fullname(path);
+		fullname.Append("/");
+		fullname.Append(target);
+		DEBUG("Looking for");
+		DEBUG(fullname.String());
+		BEntry entry(fullname.String(), false);
+		if ((entry.InitCheck()) == B_OK && entry.Exists()) {
+			//delete path;
+			DEBUG("Located at");
+			DEBUG(fullname);
+			return (char*) fullname.String();
+		} 
+		path = strtok(NULL, ":");
+	}
+	return NULL;
+}
+
+bool
+MainWindow::_TestTarget(const char* target) {
+	BEntry app, entry(target);	
+	entry_ref appRef, entryRef;
+	DEBUG("Does it exist? ");
+	if ((entry.InitCheck()) == B_OK && entry.Exists()) {
+		DEBUG("Such a file exists. ");
+		status_t status = entry.GetRef(&entryRef) && app.GetRef(&appRef);
+		if (status == B_OK) {
+			DEBUG("Got the refs ");
+			if (be_roster->FindApp(&entryRef, &appRef) == B_OK) {
+				DEBUG("Found app for ");
+				app_info info;
+				if (be_roster->GetAppInfo(&appRef, &info) == B_OK) {
+					DEBUG("Do setting icon");
+					fIconView->SetIcon(&info);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void
 MainWindow::_ParseTarget()
 {
+	DEBUG("Parsing target");
 	if (fUseTerminal->Value() == B_CONTROL_ON) {
 		fIconView->SetIcon(kTerminalSignature);
-	} else {
-		fIconView->SetDefault();
+		return;
 	}
+
+	if (_TestTarget(fTargetText->Text())) {
+		return;
+	} else if (!strchr(fTargetText->Text(), '/')) {
+		if (_TestTarget(_whereis(fTargetText->Text()))) {
+			return;
+		}
+	}
+	
+	fIconView->SetDefault();
 }
