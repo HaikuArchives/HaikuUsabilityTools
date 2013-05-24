@@ -23,6 +23,7 @@
 const uint32 MSG_RUN			= 'mRUN';
 const uint32 MSG_BROWSE			= 'mBRO';
 const uint32 MSG_CHANGED		= 'mTXC';
+const uint32 MSG_TOGGLETERMINAL	= 'mTOG';
 
 const char *kTrackerSignature	= "application/x-vnd.Be-TRAK";
 const char *kTerminalSignature	= "application/x-vnd.Haiku-Terminal";
@@ -65,14 +66,15 @@ MainWindow::MainWindow(void)
 				.Add(fTargetText, 1, 0, 6, 1)
 			)
 			.AddGroup(B_HORIZONTAL, 5.0)
-				.Add(fUseTerminal = new BCheckBox(NULL, B_TRANSLATE("Open in a terminal"), new BMessage(MSG_CHANGED)))
+				.Add(fUseTerminal = new BCheckBox(NULL, B_TRANSLATE("Open in a terminal"), new BMessage(MSG_TOGGLETERMINAL)))
 				.Add(fRunButton)
 				.Add(fBrowseButton)
 			.End()
 		.End()		
 		.SetInsets(spacing, spacing, spacing, spacing)
 	);
-	
+
+	fUseTerminal->SetEnabled(false);	
 	fTargetText->MakeFocus(true);
 	fRunButton->MakeDefault(true);
 	CenterOnScreen();
@@ -88,6 +90,15 @@ MainWindow::MessageReceived(BMessage *msg)
 {
 	switch (msg->what)
 	{
+		case MSG_TOGGLETERMINAL: 
+		{
+			if (fUseTerminal->Value() == B_CONTROL_ON) {
+				fIconView->SetIcon(kTerminalSignature);
+			} else {
+				_ParseTarget();
+			}
+		}
+		
 		case MSG_CHANGED:
 		{
 			_ParseTarget();
@@ -318,6 +329,7 @@ MainWindow::_TestTarget(const char* target) {
 					fUseTerminal->SetValue(B_CONTROL_OFF);
 					return true;
 				} else {
+					DEBUG("Needs terminal");
 					fIconView->SetIcon(kTerminalSignature);
 					fUseTerminal->SetValue(B_CONTROL_ON);
 					return true;
@@ -325,7 +337,9 @@ MainWindow::_TestTarget(const char* target) {
 			}
 		}
 	}
+	DEBUG("Restoring to default");
 	fIconView->SetDefault();
+	fUseTerminal->SetValue(B_CONTROL_OFF);
 	return false;
 }
 
@@ -335,7 +349,7 @@ MainWindow::_ParseTarget()
 	DEBUG("Parsing target");
 	if (fUseTerminal->Value() == B_CONTROL_ON) {
 		fIconView->SetIcon(kTerminalSignature);
-		return;
+		//return;
 	}
 
 	if (_TestTarget(fTargetText->Text())) {
@@ -345,7 +359,8 @@ MainWindow::_ParseTarget()
 			return;
 		}
 	}
-	
-	fIconView->SetDefault();
+//	DEBUG("Restoring to default after parsetarget");
+//	fUseTerminal->SetValue(B_CONTROL_OFF);
+//	fIconView->SetDefault();
 	return;
 }
