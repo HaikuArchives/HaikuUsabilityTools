@@ -315,11 +315,17 @@ MainWindow::_TestTarget(const char* target) {
 				if (be_roster->GetAppInfo(&appRef, &info) == B_OK) {
 					DEBUG("Do setting icon");
 					fIconView->SetIcon(&info);
+					fUseTerminal->SetValue(B_CONTROL_OFF);
+					return true;
+				} else {
+					fIconView->SetIcon(kTerminalSignature);
+					fUseTerminal->SetValue(B_CONTROL_ON);
 					return true;
 				}
 			}
 		}
 	}
+	fIconView->SetDefault();
 	return false;
 }
 
@@ -341,4 +347,5 @@ MainWindow::_ParseTarget()
 	}
 	
 	fIconView->SetDefault();
+	return;
 }
