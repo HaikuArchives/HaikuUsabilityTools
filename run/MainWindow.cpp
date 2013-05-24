@@ -28,15 +28,16 @@ const uint32 MSG_TOGGLETERMINAL	= 'mTOG';
 const char *kTrackerSignature	= "application/x-vnd.Be-TRAK";
 const char *kTerminalSignature	= "application/x-vnd.Haiku-Terminal";
 
-//#define DEBUG(message) printf(message);
+#define DEBUG(message) printf("%s\n", message)
 //#define DEBUG(message) //
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "Run Window"
-
+/*
 void DEBUG(const char *message) {
 	printf("%s\n", message);
 }
+*/
 
 MainWindow::MainWindow(void)
 	:	BWindow(BRect(100,100,500,200),B_TRANSLATE("Run"),B_TITLED_WINDOW_LOOK, 
@@ -90,15 +91,7 @@ MainWindow::MessageReceived(BMessage *msg)
 {
 	switch (msg->what)
 	{
-		case MSG_TOGGLETERMINAL: 
-		{
-			if (fUseTerminal->Value() == B_CONTROL_ON) {
-				fIconView->SetIcon(kTerminalSignature);
-			} else {
-				_ParseTarget();
-			}
-		}
-		
+		case MSG_TOGGLETERMINAL: 		
 		case MSG_CHANGED:
 		{
 			_ParseTarget();
@@ -146,7 +139,6 @@ MainWindow::MessageReceived(BMessage *msg)
 		
 		default:
 		{
-			//msg->PrintToStream();
 			BWindow::MessageReceived(msg);
 			break;
 		}
@@ -194,8 +186,24 @@ MainWindow::_Launch()
 	status_t status = B_OK;
 	
 	if (fUseTerminal->Value() == B_CONTROL_ON) {
-		char* argv[] = {(char*)fTargetText->Text()};
+		// This doesn't work
+		char* tempfn;
+		tmpnam(tempfn);
+		DEBUG(tempfn);
+		BFile temp(tempfn, B_WRITE_ONLY | B_CREATE_FILE);
+		if (tempfn == NULL || (status = temp.InitCheck() != B_OK)) {
+			BAlert alert("Error", "Couldn't open a script for writing.", "Ok");
+			alert.Go();
+			return status;
+		}		
+		temp.SetPermissions(S_IRUSR|S_IWUSR|S_IXUSR);
+		temp.Write("#!/bin/bash\n", 13);
+		temp.Write(fTargetText->Text(), strlen(fTargetText->Text()));
+		temp.Write("\n", 1);
+		char* argv[] = {tempfn};
+		DEBUG(argv[0]);
 		status = be_roster->Launch(kTerminalSignature, 1, argv);
+		return status;
 	} 
 	
 	BEntry entry(fTargetText->Text());
@@ -302,7 +310,7 @@ _whereis(const char* target) {
 		if ((entry.InitCheck()) == B_OK && entry.Exists()) {
 			//delete path;
 			DEBUG("Located at");
-			DEBUG(fullname);
+			DEBUG(fullname.String());
 			return (char*) fullname.String();
 		} 
 		path = strtok(NULL, ":");
@@ -349,7 +357,6 @@ MainWindow::_ParseTarget()
 	DEBUG("Parsing target");
 	if (fUseTerminal->Value() == B_CONTROL_ON) {
 		fIconView->SetIcon(kTerminalSignature);
-		//return;
 	}
 
 	if (_TestTarget(fTargetText->Text())) {
@@ -359,8 +366,6 @@ MainWindow::_ParseTarget()
 			return;
 		}
 	}
-//	DEBUG("Restoring to default after parsetarget");
-//	fUseTerminal->SetValue(B_CONTROL_OFF);
-//	fIconView->SetDefault();
+
 	return;
 }
